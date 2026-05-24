@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stylefit</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#FAF8F4;--ink:#1A1612;--warm:#C8956C;--warm-light:#F0E4D7;
+  --soft:#E8E2D9;--white:#FFFFFF;--muted:#8A8078;--success:#5A8A6A;--danger:#c0392b;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh}
+h1,h2,h3{font-family:'Playfair Display',serif}
+
+/* ONBOARDING */
+#onboard{position:fixed;inset:0;background:var(--cream);z-index:999;display:flex;align-items:center;justify-content:center;padding:24px}
+.ob-box{background:var(--white);border-radius:24px;padding:36px;max-width:480px;width:100%;text-align:center;box-shadow:0 4px 32px rgba(0,0,0,0.08)}
+.ob-box h2{font-size:26px;margin-bottom:8px}
+.ob-box p{color:var(--muted);font-size:14px;margin-bottom:20px;line-height:1.5}
+.ob-input{width:100%;padding:13px 18px;border:1.5px solid var(--soft);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;text-align:center;margin-bottom:20px;background:var(--white)}
+.ob-input:focus{border-color:var(--warm)}
+.ob-label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:10px}
+.ob-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px}
+.ob-tag{padding:8px 16px;border-radius:20px;border:1.5px solid var(--soft);background:var(--white);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.ob-tag.on{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.ob-custom-row{display:flex;gap:8px;margin-bottom:16px}
+.ob-custom-row input{flex:1;padding:9px 14px;border:1.5px solid var(--soft);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--white)}
+.ob-custom-row input:focus{border-color:var(--warm)}
+.ob-selected{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:28px;margin-bottom:20px}
+.ob-err{color:var(--danger);font-size:13px;margin-top:10px;min-height:18px}
+
+/* BUTTONS */
+.btn{padding:12px 28px;border-radius:24px;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-ink{background:var(--ink);color:var(--white)}
+.btn-ink:hover{background:#333}
+.btn-ink:disabled{opacity:.5;cursor:not-allowed}
+.btn-warm{background:var(--warm);color:var(--white)}
+.btn-warm:hover{background:#b5825a}
+.btn-outline{background:none;border:1.5px solid var(--soft);color:var(--ink)}
+.btn-outline:hover{background:var(--soft)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-full{width:100%}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--white);border-bottom:1px solid var(--soft);position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:20px}
+.logo em{color:var(--warm);font-style:italic}
+.nav-right{display:flex;align-items:center;gap:10px}
+.handle-pill{font-size:13px;color:var(--muted);cursor:default}
+.tabs{display:flex;gap:4px}
+.tab{background:none;border:none;padding:8px 14px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);transition:all .2s}
+.tab.on{background:var(--ink);color:var(--white)}
+.tab:hover:not(.on){background:var(--soft)}
+
+/* PAGES */
+.page{display:none;padding:24px;max-width:960px;margin:0 auto}
+.page.on{display:block}
+.page-title{font-size:26px;margin-bottom:6px}
+.page-sub{color:var(--muted);font-size:14px;margin-bottom:24px}
+
+/* UPLOAD */
+.drop-zone{border:2px dashed var(--soft);border-radius:16px;padding:36px;text-align:center;cursor:pointer;transition:all .25s;background:var(--white);position:relative;margin-bottom:16px}
+.prev-thumb-wrap{position:relative;width:90px;height:90px;flex-shrink:0}
+.prev-thumb-wrap img{width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--soft);display:block}
+.prev-thumb-wrap.primary img{border:2px solid var(--warm)}
+.prev-thumb-primary{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);background:var(--warm);color:white;font-size:9px;padding:2px 6px;border-radius:8px;white-space:nowrap}
+.prev-thumb-remove{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--danger);color:white;border:none;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;line-height:1}
+.drop-zone:hover{border-color:var(--warm);background:var(--warm-light)}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-zone-icon{font-size:32px;margin-bottom:10px}
+.drop-zone h3{font-size:15px;margin-bottom:4px}
+.drop-zone p{font-size:13px;color:var(--muted)}
+#preview-wrap{display:none;position:relative;margin-bottom:16px}
+#preview-wrap img{width:100%;max-height:260px;object-fit:contain;border-radius:12px;background:var(--white);border:1px solid var(--soft)}
+.ai-badge{position:absolute;top:10px;right:10px;background:var(--ink);color:var(--white);font-size:11px;padding:4px 10px;border-radius:20px;display:none}
+.proc-overlay{position:absolute;inset:0;background:rgba(250,248,244,.85);border-radius:12px;display:none;align-items:center;justify-content:center;gap:8px;font-size:13px;color:var(--muted);flex-direction:column}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select{padding:10px 14px;border:1px solid var(--soft);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--white);color:var(--ink);outline:none}
+.fg input:focus,.fg select:focus{border-color:var(--warm)}
+.pub-row{display:flex;align-items:center;justify-content:space-between;background:var(--white);border:1px solid var(--soft);border-radius:12px;padding:14px 18px;margin-bottom:20px}
+.pub-row-text h4{font-size:14px;font-weight:500;margin-bottom:2px}
+.pub-row-text p{font-size:12px;color:var(--muted)}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-sl{position:absolute;inset:0;background:var(--soft);border-radius:12px;cursor:pointer;transition:.3s}
+.toggle-sl:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-sl{background:var(--warm)}
+.toggle input:checked+.toggle-sl:before{transform:translateX(20px)}
+
+/* MY CLOSET */
+.closet-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.closet-title-alt{color:var(--muted);cursor:pointer;transition:color .2s;font-size:26px}
+.closet-title-alt:hover{color:var(--ink)}
+.closet-title-alt.on{color:var(--ink)}
+#closet-title-pieces{transition:color .2s}
+#closet-title-pieces.muted{color:var(--muted)}
+#closet-title-pieces.muted:hover{color:var(--ink)}
+.count-badge{background:var(--soft);border-radius:12px;padding:3px 10px;font-size:12px;color:var(--muted)}
+.vibes-banner{background:var(--white);border:1px solid var(--soft);border-radius:14px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.vibes-banner-tags{display:flex;flex-wrap:wrap;gap:6px}
+.vbadge{padding:4px 12px;border-radius:20px;background:var(--ink);color:var(--white);font-size:12px;font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:16px}
+.icard{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(26,22,18,.07);transition:transform .2s,box-shadow .2s;position:relative}
+.icard:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(26,22,18,.11)}
+.icard img{width:100%;height:200px;object-fit:contain;background:var(--white);display:block}
+.icard-ph{width:100%;height:200px;background:linear-gradient(135deg,var(--warm-light),var(--soft));display:flex;align-items:center;justify-content:center;font-size:40px}
+.icard-acts{position:absolute;top:8px;right:8px;display:flex;gap:5px;opacity:1}
+.icard-btn{width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;backdrop-filter:blur(4px);transition:all .15s}
+.icard-edit{background:rgba(255,255,255,.92);color:var(--ink)}
+.icard-edit:hover{background:var(--ink);color:white}
+.icard-del{background:rgba(255,255,255,.92);color:var(--danger)}
+.icard-del:hover{background:var(--danger);color:white}
+.icard-body{padding:12px}
+.icard-name{font-size:14px;font-weight:500;margin-bottom:8px}
+.icard-pub{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--soft)}
+.pub-label{font-size:11px;color:var(--muted)}
+.tog-sm{position:relative;width:34px;height:18px}
+.tog-sm input{opacity:0;width:0;height:0;position:absolute}
+.tog-sm-sl{position:absolute;inset:0;background:var(--soft);border-radius:9px;cursor:pointer;transition:.3s}
+.tog-sm-sl:before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:white;border-radius:50%;transition:.3s}
+.tog-sm input:checked+.tog-sm-sl{background:var(--warm)}
+.tog-sm input:checked+.tog-sm-sl:before{transform:translateX(16px)}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);grid-column:1/-1}
+.empty h3{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:8px;color:var(--ink)}
+.empty p{font-size:14px;margin-bottom:20px}
+
+/* OUTFITS RECEIVED */
+.sec-div{display:flex;align-items:center;gap:12px;margin:32px 0 20px}
+.sec-div h3{font-size:18px;white-space:nowrap}
+.sec-line{flex:1;height:1px;background:var(--soft)}
+.outfit-card{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(26,22,18,.07);margin-bottom:14px}
+.outfit-hdr{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}
+.outfit-av{width:30px;height:30px;border-radius:50%;background:var(--warm-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--warm)}
+.outfit-by{font-size:13px;font-weight:500}
+.outfit-time{font-size:11px;color:var(--muted);margin-left:auto}
+.outfit-pieces{display:flex;gap:8px;padding:8px 16px;overflow-x:auto}
+.outfit-piece{flex-shrink:0;width:72px;text-align:center}
+.outfit-piece img{width:72px;height:88px;object-fit:contain;border-radius:8px;background:white;border:1px solid var(--soft);display:block}
+.outfit-piece-ph{width:72px;height:88px;border-radius:8px;background:linear-gradient(135deg,var(--warm-light),var(--soft));display:flex;align-items:center;justify-content:center;font-size:20px}
+.outfit-piece-name{font-size:10px;color:var(--muted);margin-top:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.outfit-note{font-size:13px;font-style:italic;color:var(--muted);padding:4px 16px 12px;line-height:1.5}
+.outfit-foot{display:flex;align-items:center;padding:10px 16px;border-top:1px solid var(--soft)}
+.like-btn{background:none;border:1px solid var(--soft);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.like-btn:hover,.like-btn.liked{background:var(--warm-light);border-color:var(--warm);color:var(--warm)}
+.no-outfits{text-align:center;padding:24px;color:var(--muted);font-size:13px;background:var(--white);border-radius:12px;border:1px dashed var(--soft)}
+/* STAR RATING */
+.rating-row{display:flex;flex-direction:column;align-items:flex-end;gap:3px;margin-left:auto}
+.rating-lbl{font-size:11px;color:var(--muted)}
+.srow{display:flex;gap:3px}
+.srow .s{font-size:30px;color:#E0DAD3;line-height:1;cursor:pointer;user-select:none;transition:color .08s,transform .08s}
+.srow .s.lit{color:#C8956C}
+.srow.locked .s{cursor:default}
+.rating-given{font-size:11px;color:var(--success);font-weight:500}
+
+/* DISCOVER */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.fpill{padding:7px 16px;border-radius:20px;border:1.5px solid var(--soft);background:var(--white);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.fpill.on{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.fpill:hover:not(.on){border-color:var(--warm);color:var(--warm)}
+.ccard{background:var(--white);border-radius:20px;padding:20px;box-shadow:0 2px 12px rgba(26,22,18,.08);margin-bottom:16px}
+.ccard-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.av{width:36px;height:36px;border-radius:50%;background:var(--warm-light);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--warm);flex-shrink:0}
+.ccard-name{font-size:15px;font-weight:500}
+.ccard-meta-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:2px}
+.ccard-count{font-size:12px;color:var(--muted)}
+.ccard-dot{font-size:12px;color:var(--soft)}
+.ccard-styled{font-size:12px;color:var(--muted)}
+.ccard-avg-rating{font-size:12px;font-weight:600;color:var(--warm)}
+.ccard-vibes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.ccard-pieces{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px}
+.ccard-pieces::-webkit-scrollbar{height:3px}
+.ccard-pieces::-webkit-scrollbar-thumb{background:var(--warm);border-radius:2px}
+.prev-item{flex-shrink:0;width:90px;text-align:center}
+.prev-thumb{width:90px;height:110px;border-radius:10px;object-fit:contain;background:var(--white);border:1px solid var(--soft);display:block}
+.prev-ph{width:90px;height:110px;border-radius:10px;background:linear-gradient(135deg,var(--warm-light),var(--soft));display:flex;align-items:center;justify-content:center;font-size:24px}
+.prev-name{font-size:10px;color:var(--muted);margin-top:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.prev-more{flex-shrink:0;width:80px;height:110px;border-radius:10px;border:1px solid var(--soft);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
+.style-btn{width:100%;padding:11px;border-radius:12px;border:1.5px solid var(--ink);background:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.style-btn:hover{background:var(--ink);color:var(--white)}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,22,18,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.on{display:flex}
+.modal{background:var(--cream);border-radius:24px;padding:32px;width:96vw;max-width:1000px;max-height:92vh;overflow-y:auto}
+.modal h2{font-size:22px;margin-bottom:4px}
+.modal-sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+.piece-sel{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.selected-strip{display:flex;gap:14px;overflow-x:auto;padding:16px;background:var(--white);border:1.5px solid var(--warm);border-radius:14px;margin-bottom:16px;min-height:140px;align-items:flex-start;flex-wrap:nowrap}
+.selected-strip::-webkit-scrollbar{height:3px}
+.selected-strip::-webkit-scrollbar-thumb{background:var(--warm);border-radius:2px}
+.selected-strip-empty{font-size:13px;color:var(--muted);font-style:italic;align-self:center}
+.selected-strip-item{flex-shrink:0;text-align:center;position:relative;width:90px}
+.selected-strip-item img{width:90px;height:110px;object-fit:contain;border-radius:10px;background:white;border:1px solid var(--soft);display:block}
+.selected-strip-item-ph{width:90px;height:110px;border-radius:10px;background:var(--warm-light);display:flex;align-items:center;justify-content:center;font-size:26px}
+.selected-strip-item-name{font-size:11px;color:var(--ink);margin-top:5px;max-width:90px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:500}
+.selected-strip-remove{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:white;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;line-height:1}
+.piece-cat-header{grid-column:1/-1;font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding-top:8px;border-top:1px solid var(--soft);margin-top:4px}
+.piece-cat-header:first-child{border-top:none;padding-top:0;margin-top:0}
+.cat-filter-pill{padding:6px 16px;border-radius:20px;border:1.5px solid var(--soft);background:var(--white);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all .2s}
+.cat-filter-pill:hover{border-color:var(--warm);color:var(--warm)}
+.cat-filter-pill.on{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.piece-opt{border:2px solid var(--soft);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;background:var(--white)}
+.piece-opt:hover{border-color:var(--warm)}
+.piece-opt.on{border-color:var(--warm);background:var(--warm-light)}
+.piece-opt img{width:100%;height:110px;object-fit:contain;background:white}
+.piece-opt-ph{width:100%;height:110px;background:linear-gradient(135deg,var(--warm-light),var(--soft));display:flex;align-items:center;justify-content:center;font-size:22px}
+.piece-opt-lbl{font-size:11px;color:var(--muted)}
+.note-inp{width:100%;padding:12px 14px;border:1px solid var(--soft);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;resize:none;height:80px;background:var(--white);color:var(--ink);outline:none;margin-bottom:16px}
+.note-inp:focus{border-color:var(--warm)}
+.modal-acts{display:flex;gap:10px}
+.status{font-size:13px;font-weight:500;margin-top:10px;display:block}
+.status.ok{color:var(--success)}
+.status.err{color:var(--danger)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:6px}
+.spin-dk{border-color:rgba(26,22,18,.2);border-top-color:var(--ink)}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:900;display:none;align-items:center;justify-content:center;padding:20px}
+.lightbox.on{display:flex}
+.lightbox img{max-width:90vw;max-height:85vh;object-fit:contain;border-radius:16px;background:white}
+.lightbox-close{position:absolute;top:20px;right:24px;background:none;border:none;color:white;font-size:28px;cursor:pointer;line-height:1}
+
+/* MY STATS BANNER */
+.my-stats-banner{display:flex;align-items:center;gap:20px;background:var(--white);border:1px solid var(--soft);border-radius:14px;padding:16px 20px;margin-bottom:16px}
+.my-stat{text-align:center}
+.my-stat-val{font-size:22px;font-weight:600;font-family:'Playfair Display',serif;color:var(--ink)}
+.my-stat-val.gold{color:var(--warm)}
+.my-stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.my-stat-divider{width:1px;height:36px;background:var(--soft)}
+
+/* STARS */
+.rating-row{display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-left:auto}
+.rating-label-txt{font-size:11px;color:var(--muted);text-align:right}
+.star-row{display:flex;gap:2px;cursor:pointer}
+.sstar{font-size:28px;color:#E8E2D9;line-height:1;transition:color .1s,transform .1s;user-select:none;padding:0 1px}
+.sstar.lit{color:#C8956C}
+.star-row:not([data-rated="0"]) .sstar{cursor:default}
+.star-row:hover .sstar{transform:scale(1.05)}
+.rating-given{font-size:11px;color:var(--success);font-weight:500;text-align:right}
+
+/* STYLIST STATS BADGE in feed */
+.stylist-stats{display:flex;align-items:center;gap:10px;margin-left:auto}
+.stat-pill{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.stat-pill span{font-weight:500;color:var(--ink)}
+
+/* STYLE REQUESTS */
+.req-section{background:var(--white);border:1px solid var(--soft);border-radius:16px;padding:18px 20px;margin-bottom:24px}
+.req-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.req-section-hdr h3{font-size:16px;font-weight:500}
+.req-add-row{display:flex;gap:8px;margin-bottom:12px}
+.req-add-row input{flex:1;padding:9px 14px;border:1.5px solid var(--soft);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--white)}
+.req-add-row input:focus{border-color:var(--warm)}
+.req-list{display:flex;flex-direction:column;gap:8px}
+.req-chip{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--white);border:1px solid var(--soft);border-radius:12px;gap:8px;transition:border-color .2s}
+.modal-req-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:var(--white);border:1.5px solid var(--soft);border-radius:20px;font-size:12px;cursor:pointer;transition:all .2s;color:var(--ink);white-space:nowrap}
+.modal-req-chip:hover{border-color:var(--warm);background:var(--warm-light);color:var(--warm)}
+.modal-req-chip.active{border-color:var(--warm);background:var(--warm-light);color:var(--warm);font-weight:500}
+.req-chip:hover{border-color:var(--warm)}
+.req-chip-text{font-size:13px;color:var(--ink);line-height:1.4}
+.req-chip-del{background:none;border:none;color:var(--soft);cursor:pointer;font-size:16px;padding:0;flex-shrink:0;transition:color .15s;line-height:1}
+.req-chip-del:hover{color:var(--danger)}
+.req-empty{font-size:13px;color:var(--muted);text-align:center;padding:12px 0}
+/* Discover request badge */
+.req-badge{display:inline-flex;align-items:center;gap:5px;background:var(--warm-light);border:1px solid var(--warm);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--warm);font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.req-badge:hover{background:var(--warm);color:white}
+.req-badges-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+
+/* PIN PAD */
+.pin-dots{display:flex;justify-content:center;gap:16px;margin:20px 0}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--soft);background:transparent;transition:background .15s}
+.pin-dot.filled{background:var(--ink);border-color:var(--ink)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto 8px}
+.pin-key{padding:16px;border-radius:12px;border:1px solid var(--soft);background:var(--white);font-size:20px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+.pin-key:hover{background:var(--soft)}
+.pin-key:active{background:var(--ink);color:white;transform:scale(.95)}
+.pin-back{font-size:16px}
+
+/* EDIT MODAL PHOTO */
+.edit-photo-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+.edit-photo-preview{width:100px;height:120px;object-fit:contain;border-radius:10px;background:var(--soft);border:1px solid var(--soft);flex-shrink:0}
+.edit-photo-drop{flex:1;position:relative;border:1.5px dashed var(--soft);border-radius:10px;padding:12px;text-align:center;background:var(--white);cursor:pointer}
+.edit-photo-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.edit-photo-drop-icon{font-size:20px;margin-bottom:4px}
+.edit-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div id="onboard">
+  <!-- SCREEN 1: Handle entry -->
+  <div class="ob-box" id="ob-screen-login">
+    <h2>Welcome to Style<em>fit</em></h2>
+    <p>Share your closet and let others style you.</p>
+    <input class="ob-input" id="ob-handle" type="text" placeholder="@yourhandle" maxlength="20" autocomplete="off">
+    <button class="btn btn-ink btn-full" id="ob-continue">Continue →</button>
+    <div class="ob-err" id="ob-err"></div>
+    <p style="font-size:12px;color:var(--muted);margin-top:16px">New here? Enter a new handle to create your account.</p>
+  </div>
+
+  <!-- SCREEN 2: PIN entry (returning user) or PIN setup (new user) -->
+  <div class="ob-box" id="ob-screen-pin" style="display:none">
+    <h2 id="pin-title">Enter your PIN</h2>
+    <p id="pin-subtitle">Enter your 4-digit PIN to log in.</p>
+    <div class="pin-dots" id="pin-dots">
+      <span class="pin-dot" id="pd0"></span>
+      <span class="pin-dot" id="pd1"></span>
+      <span class="pin-dot" id="pd2"></span>
+      <span class="pin-dot" id="pd3"></span>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" data-v="1">1</button>
+      <button class="pin-key" data-v="2">2</button>
+      <button class="pin-key" data-v="3">3</button>
+      <button class="pin-key" data-v="4">4</button>
+      <button class="pin-key" data-v="5">5</button>
+      <button class="pin-key" data-v="6">6</button>
+      <button class="pin-key" data-v="7">7</button>
+      <button class="pin-key" data-v="8">8</button>
+      <button class="pin-key" data-v="9">9</button>
+      <button class="pin-key pin-back" id="pin-back">⌫</button>
+      <button class="pin-key" data-v="0">0</button>
+      <div></div>
+    </div>
+    <div class="ob-err" id="ob-err-pin"></div>
+    <button class="btn btn-outline btn-sm" id="pin-back-btn" style="margin-top:12px">← Back</button>
+  </div>
+
+  <!-- SCREEN 3: First-time setup — pick vibes -->
+  <div class="ob-box" id="ob-screen-vibes" style="display:none">
+    <h2>Pick your vibes</h2>
+    <p>Choose the styles that describe your closet.<br>You can always change these later.</p>
+    <span class="ob-label">Select at least one</span>
+    <div class="ob-tags" id="ob-tags"></div>
+    <div class="ob-custom-row">
+      <input type="text" id="ob-custom" placeholder="Add your own vibe..." maxlength="24" autocomplete="off">
+      <button class="btn btn-outline btn-sm" id="ob-custom-add">+ Add</button>
+    </div>
+    <div class="ob-selected" id="ob-selected"></div>
+    <button class="btn btn-ink btn-full" id="ob-go">Create my closet →</button>
+    <div class="ob-err" id="ob-err-vibes"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Style<em>fit</em></div>
+  <div class="nav-right">
+    <span class="handle-pill" id="nav-handle"></span>
+    <button class="btn btn-outline btn-sm" id="btn-logout" style="font-size:12px;padding:6px 12px">Log out</button>
+    <div class="tabs">
+      <button class="tab on" id="tab-closet">My Closet</button>
+      <button class="tab" id="tab-feed">Discover</button>
+    </div>
+  </div>
+</nav>
+
+<!-- MY CLOSET PAGE -->
+<div class="page on" id="page-closet">
+  <!-- Header with inline title toggle -->
+  <div class="closet-hdr">
+    <div style="display:flex;align-items:baseline;gap:24px">
+      <h2 class="page-title" id="closet-title-pieces" onclick="showClosetTab('pieces')" style="cursor:pointer">My Closet</h2>
+      <h2 class="page-title closet-title-alt" id="closet-title-styled" onclick="showClosetTab('styled')">Styled by others</h2>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+      <span class="count-badge" id="closet-count">0 pieces</span>
+      <button class="btn btn-ink btn-sm" id="btn-upload">+ Upload a piece</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="my-stats-banner" id="my-stats-banner">
+    <div class="my-stat"><div class="my-stat-val gold" id="my-rating">—</div><div class="my-stat-lbl">Avg Rating</div></div>
+    <div class="my-stat-divider"></div>
+    <div class="my-stat"><div class="my-stat-val" id="my-styled-count">0</div><div class="my-stat-lbl">Outfits Styled</div></div>
+    <div class="my-stat-divider"></div>
+    <div class="my-stat"><div class="my-stat-val" id="my-ratings-count">0</div><div class="my-stat-lbl">Ratings Received</div></div>
+  </div>
+
+  <!-- Vibes -->
+  <div class="vibes-banner">
+    <div class="vibes-banner-tags" id="my-vibes"></div>
+    <button class="btn btn-outline btn-sm" id="btn-edit-vibes">Edit vibes</button>
+  </div>
+
+  <!-- TAB: My Pieces -->
+  <div id="ctab-content-pieces">
+    <div class="req-section">
+      <div class="req-section-hdr">
+        <h3>✦ My style requests</h3>
+        <span style="font-size:12px;color:var(--muted)">Stylists can respond to these</span>
+      </div>
+      <div class="req-add-row">
+        <input type="text" id="req-input" placeholder="e.g. Outfit for a date night, office look, beach wedding..." maxlength="80" autocomplete="off">
+        <button class="btn btn-ink btn-sm" id="btn-add-req">+ Add</button>
+      </div>
+      <div class="req-list" id="req-list">
+        <div class="req-empty">No requests yet — add one above</div>
+      </div>
+    </div>
+    <div class="grid" id="closet-grid">
+      <div class="empty"><h3>Nothing here yet</h3><p>Upload your first piece!</p></div>
+    </div>
+  </div>
+
+  <!-- TAB: Styled by Others -->
+  <div id="ctab-content-styled" style="display:none">
+    <div id="outfits-received">
+      <div class="no-outfits">No styling yet — once others style your pieces, they will appear here ✨</div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD PAGE -->
+<div class="page" id="page-upload">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+    <button class="btn btn-outline btn-sm" onclick="showPage('closet')" style="display:flex;align-items:center;gap:5px">← Back</button>
+    <h1 class="page-title" style="margin-bottom:0">Add a piece</h1>
+  </div>
+  <p class="page-sub">Upload photos of your piece</p>
+
+  <!-- Multi-image upload zone -->
+  <div class="drop-zone" id="drop-zone">
+    <input type="file" id="file-input" accept="image/*" multiple>
+    <div class="drop-zone-icon">📷</div>
+    <h3>Drop photos here</h3>
+    <p>or click to browse — up to 50MB per photo</p>
+  </div>
+
+  <!-- Image previews grid -->
+  <div id="preview-grid" style="display:none;margin-bottom:16px">
+    <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Photos <span id="img-count" style="color:var(--warm)"></span></div>
+    <div id="preview-thumbs" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  </div>
+
+  <div class="form-grid">
+    <div class="fg" style="grid-column:1/-1"><label>Item name *</label><input id="up-name" type="text" placeholder="e.g. Striped linen shirt" autocomplete="off"></div>
+    <div class="fg"><label>Brand <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><input id="up-brand" type="text" placeholder="e.g. Zara, Vintage, H&M" autocomplete="off"></div>
+    <div class="fg"><label>Category *</label>
+      <select id="up-cat">
+        <option value="">Select...</option>
+        <option>Tops</option><option>Shirts &amp; Blouses</option><option>Jackets</option><option>Pants</option>
+        <option>Skirts</option><option>Bottoms</option><option>Dresses</option>
+        <option>Outerwear</option><option>Shoes</option><option>Accessories</option>
+      </select>
+    </div>
+    <div class="fg"><label>Color</label><input id="up-color" type="text" placeholder="e.g. Ivory" autocomplete="off"></div>
+    <div class="fg"><label>Material <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><input id="up-material" type="text" placeholder="e.g. 100% linen, silk blend" autocomplete="off"></div>
+    <div class="fg" style="grid-column:1/-1"><label>Additional details <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><input id="up-details" type="text" placeholder="e.g. Midi length, button-down front, puff sleeves" autocomplete="off"></div>
+  </div>
+
+  <div class="pub-row">
+    <div class="pub-row-text">
+      <h4>Make this piece public</h4>
+      <p>Others can discover and style it in their feed</p>
+    </div>
+    <label class="toggle"><input type="checkbox" id="up-public" checked><span class="toggle-sl"></span></label>
+  </div>
+  <button class="btn btn-ink" id="btn-add-item">Add to closet →</button>
+  <span class="status" id="up-status"></span>
+</div>
+
+<!-- DISCOVER PAGE -->
+<div class="page" id="page-feed">
+  <h2 class="page-title">Discover</h2>
+  <p class="page-sub">Browse closets by vibe — click one to style it</p>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <input id="vibe-search" type="text" placeholder="Search or add a vibe..." autocomplete="off"
+      style="flex:1;padding:9px 14px;border:1.5px solid var(--soft);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--white)">
+    <button class="btn btn-outline btn-sm" id="btn-vibe-search">Search</button>
+  </div>
+  <div class="filter-row" id="feed-filters"></div>
+  <div id="feed-content"><div class="empty"><h3>Loading...</h3></div></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close">✕</button>
+  <img id="lightbox-img" src="" alt="Full view">
+</div>
+
+<!-- MODAL: STYLE -->
+<div class="modal-overlay" id="modal-style">
+  <div class="modal">
+    <!-- Title row with action buttons top right -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:4px">
+      <div>
+        <h2 style="margin-bottom:2px">Style this closet</h2>
+        <p class="modal-sub" id="style-sub" style="margin-bottom:0">Pick pieces to build an outfit</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;padding-top:4px">
+        <button class="btn btn-outline btn-sm" id="btn-style-cancel">Cancel</button>
+        <button class="btn btn-ink btn-sm" id="btn-post">Post outfit →</button>
+      </div>
+    </div>
+    <span class="status" id="style-status" style="display:block;margin-bottom:8px"></span>
+
+    <!-- Style requests pills -->
+    <div id="modal-requests" style="display:none;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Style requests</div>
+      <div id="modal-req-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+    </div>
+
+    <!-- Selected outfit strip -->
+    <div id="selected-strip-wrap" style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Selected outfit</div>
+      <div class="selected-strip" id="selected-strip">
+        <div style="width:100%;text-align:center;padding:16px 0"><div style="font-size:15px;color:var(--muted);margin-bottom:4px">No pieces selected yet</div><div style="font-size:12px;color:var(--soft)">Browse by category below and click to add</div></div>
+      </div>
+    </div>
+
+    <!-- Note -->
+    <textarea class="note-inp" id="style-note" placeholder="Add a styling note..." style="margin-bottom:16px"></textarea>
+
+    <!-- Category filter pills -->
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Browse by category</div>
+      <div id="cat-filter-pills" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+    </div>
+
+    <!-- Pieces grid (filtered) -->
+    <div class="piece-sel" id="piece-sel"></div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT PIECE -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <h2>Edit piece</h2>
+    <p class="modal-sub">Update details or replace the photo</p>
+    <input type="hidden" id="edit-id">
+    <div class="edit-photo-row">
+      <div style="position:relative;flex-shrink:0">
+        <img id="edit-preview" class="edit-photo-preview" alt="Current">
+        <div id="edit-proc" style="display:none;position:absolute;inset:0;background:rgba(250,248,244,.85);border-radius:10px;align-items:center;justify-content:center;flex-direction:column;gap:4px;font-size:11px;color:var(--muted)">
+          <span class="spin spin-dk"></span><span>Processing...</span>
+        </div>
+      </div>
+      <div class="edit-photo-drop">
+        <input type="file" id="edit-file" accept="image/*" multiple>
+        <div class="edit-photo-drop-icon">📷</div>
+        <div style="font-size:12px;font-weight:500">Replace photos</div>
+        <div style="font-size:11px;color:var(--muted)">Select one or more</div>
+      </div>
+    </div>
+    <div class="edit-modal-grid">
+      <div class="fg" style="grid-column:1/-1"><label>Item name</label><input id="edit-name" type="text" autocomplete="off"></div>
+      <div class="fg"><label>Brand <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><input id="edit-brand" type="text" autocomplete="off" placeholder="e.g. Zara, Vintage"></div>
+      <div class="fg"><label>Category</label>
+        <select id="edit-cat">
+          <option>Tops</option><option>Shirts &amp; Blouses</option><option>Jackets</option><option>Pants</option>
+          <option>Skirts</option><option>Bottoms</option><option>Dresses</option>
+          <option>Outerwear</option><option>Shoes</option><option>Accessories</option>
+        </select>
+      </div>
+      <div class="fg"><label>Color</label><input id="edit-color" type="text" autocomplete="off"></div>
+      <div class="fg"><label>Material <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><input id="edit-material" type="text" autocomplete="off" placeholder="e.g. 100% linen"></div>
+      <div class="fg" style="grid-column:1/-1"><label>Additional details <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><input id="edit-details" type="text" autocomplete="off" placeholder="e.g. Midi length, button-down front"></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <label class="fg" style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Make public</span>
+        <label class="toggle"><input type="checkbox" id="edit-public"><span class="toggle-sl"></span></label>
+      </label>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-ink" id="btn-save-edit">Save changes</button>
+      <button class="btn btn-outline" id="btn-edit-cancel">Cancel</button>
+    </div>
+    <span class="status" id="edit-status"></span>
+  </div>
+</div>
+
+<!-- MODAL: EDIT VIBES -->
+<div class="modal-overlay" id="modal-vibes">
+  <div class="modal">
+    <h2>Your closet vibes</h2>
+    <p class="modal-sub">These tags help others find you in Discover</p>
+    <div class="ob-tags" id="vibes-tags"></div>
+    <div class="ob-custom-row" style="margin-top:12px">
+      <input type="text" id="vibes-custom" placeholder="Add your own vibe..." maxlength="24" autocomplete="off">
+      <button class="btn btn-outline btn-sm" id="vibes-custom-add">+ Add</button>
+    </div>
+    <div class="ob-selected" id="vibes-selected" style="margin-top:8px;margin-bottom:20px"></div>
+    <div class="modal-acts">
+      <button class="btn btn-ink" id="btn-save-vibes">Save vibes</button>
+      <button class="btn btn-outline" id="btn-vibes-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONSTANTS ────────────────────────────────────────────────
+const VIBES = ['Sporty','Feminine','Tailored','Streetwear','Bohemian','Minimalist','Maximalist','Preppy','Edgy','Romantic','Classic','Casual'];
+const EMOJIS = {Tops:'👕','Shirts & Blouses':'👚',Jackets:'🧥',Pants:'👖',Skirts:'👗',Bottoms:'👖',Dresses:'👗',Outerwear:'🧥',Shoes:'👟',Accessories:'👜'};
+
+// ─── STATE ────────────────────────────────────────────────────
+let handle = '', userVibes = [];
+let myItems = [], publicItems = [], myOutfits = [], allOutfits = [], allRequests = [];
+let selectedFile = null, processedImg = null;
+let uploadedImages = [];
+let editFile = null, editProcessedImg = null;
+let activeVibe = 'all';
+let selectedPieces = new Set(), modalOwnerHandle = '';
+let editVibesSelected = [];
+
+// ─── ONBOARDING ───────────────────────────────────────────────
+(function setupOnboarding() {
+  // Active session — go straight in
+  const savedHandle = localStorage.getItem('sf_handle');
+  const savedVibes  = localStorage.getItem('sf_vibes');
+  if (savedHandle && savedVibes) {
+    handle = savedHandle;
+    userVibes = JSON.parse(savedVibes);
+    document.getElementById('onboard').style.display = 'none';
+    boot();
+    return;
+  }
+
+  let pendingHandle = '';
+  let pinBuffer = '';
+  let pinMode = ''; // 'login' or 'setup' or 'confirm'
+  let pinFirst = ''; // for confirm during setup
+
+  function showScreen(id) {
+    ['ob-screen-login','ob-screen-pin','ob-screen-vibes'].forEach(s => {
+      document.getElementById(s).style.display = s === id ? 'block' : 'none';
+    });
+  }
+
+  function resetPin() {
+    pinBuffer = '';
+    updatePinDots();
+    document.getElementById('ob-err-pin').textContent = '';
+  }
+
+  function updatePinDots() {
+    for (let i = 0; i < 4; i++) {
+      document.getElementById('pd'+i).classList.toggle('filled', i < pinBuffer.length);
+    }
+  }
+
+  // Wire PIN pad
+  document.querySelectorAll('.pin-key[data-v]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (pinBuffer.length >= 4) return;
+      pinBuffer += btn.dataset.v;
+      updatePinDots();
+      if (pinBuffer.length === 4) onPinComplete();
+    });
+  });
+  document.getElementById('pin-back').addEventListener('click', () => {
+    pinBuffer = pinBuffer.slice(0, -1);
+    updatePinDots();
+  });
+  document.getElementById('pin-back-btn').addEventListener('click', () => {
+    resetPin();
+    showScreen('ob-screen-login');
+  });
+
+  async function onPinComplete() {
+    const pin = pinBuffer;
+
+    if (pinMode === 'login') {
+      // Verify PIN against Firebase profile
+      const btn = document.getElementById('ob-continue');
+      const err = document.getElementById('ob-err-pin');
+      await waitForFb();
+      const profile = await window.fb.getProfileOnce(pendingHandle);
+      if (profile && profile.pin === pin) {
+        loginUser(pendingHandle, profile.vibes || ['Casual']);
+      } else {
+        err.textContent = 'Incorrect PIN. Try again.';
+        setTimeout(() => resetPin(), 800);
+      }
+
+    } else if (pinMode === 'setup') {
+      // First PIN entry — ask to confirm
+      pinFirst = pin;
+      pinMode = 'confirm';
+      resetPin();
+      document.getElementById('pin-title').textContent = 'Confirm your PIN';
+      document.getElementById('pin-subtitle').textContent = 'Enter the same PIN again to confirm.';
+
+    } else if (pinMode === 'confirm') {
+      if (pin === pinFirst) {
+        // PINs match — save and go to vibe picker
+        pendingHandle._pin = pin;
+        window._newUserPin = pin;
+        resetPin();
+        showScreen('ob-screen-vibes');
+        buildObVibeTags();
+      } else {
+        document.getElementById('ob-err-pin').textContent = "PINs do not match. Try again.";
+        pinMode = 'setup';
+        pinFirst = '';
+        document.getElementById('pin-title').textContent = 'Set a PIN';
+        document.getElementById('pin-subtitle').textContent = 'Choose a 4-digit PIN to secure your account.';
+        setTimeout(() => resetPin(), 800);
+      }
+    }
+  }
+
+  // Continue button — check handle
+  function onContinue() {
+    const raw = document.getElementById('ob-handle').value.trim().replace(/^@/, '');
+    const err = document.getElementById('ob-err');
+    err.textContent = '';
+    if (!raw) { err.textContent = 'Please enter a handle.'; return; }
+    if (!/^[a-zA-Z0-9_]{2,20}$/.test(raw)) {
+      err.textContent = 'Handle: 2-20 letters, numbers or underscores.'; return;
+    }
+    const btn = document.getElementById('ob-continue');
+    btn.disabled = true; btn.textContent = 'Checking...';
+
+    waitForFb().then(() => window.fb.getProfileOnce(raw)).then(profile => {
+      btn.disabled = false; btn.textContent = 'Continue →';
+      pendingHandle = raw;
+      resetPin();
+
+      if (profile) {
+        // Existing user — ask for PIN to log in
+        pinMode = 'login';
+        document.getElementById('pin-title').textContent = 'Enter your PIN';
+        document.getElementById('pin-subtitle').textContent = 'Enter your 4-digit PIN to log in as @' + raw + '.';
+        showScreen('ob-screen-pin');
+      } else {
+        // New user — set up PIN
+        pinMode = 'setup';
+        document.getElementById('pin-title').textContent = 'Set a PIN';
+        document.getElementById('pin-subtitle').textContent = 'Choose a 4-digit PIN to secure your @' + raw + ' account.';
+        showScreen('ob-screen-pin');
+      }
+    }).catch((e) => {
+      btn.disabled = false; btn.textContent = 'Continue →';
+      // Firebase check failed — show PIN setup screen anyway
+      // This handles the case where auth rules block the read
+      pendingHandle = raw;
+      resetPin();
+      pinMode = 'setup';
+      document.getElementById('pin-title').textContent = 'Set a PIN';
+      document.getElementById('pin-subtitle').textContent = 'Choose a 4-digit PIN to secure your @' + raw + ' account.';
+      showScreen('ob-screen-pin');
+    });
+  }
+
+  document.getElementById('ob-continue').addEventListener('click', onContinue);
+  document.getElementById('ob-handle').addEventListener('keydown', e => {
+    if (e.key === 'Enter') onContinue();
+  });
+})();
+
+
+function loginUser(h, vibes) {
+  handle = h;
+  userVibes = vibes;
+  localStorage.setItem('sf_handle', handle);
+  localStorage.setItem('sf_vibes', JSON.stringify(userVibes));
+  localStorage.setItem('sf_vibes_' + handle.toLowerCase(), JSON.stringify(userVibes));
+  document.getElementById('onboard').style.display = 'none';
+  boot();
+}
+
+function waitForFb() {
+  return new Promise(resolve => {
+    if (window._firebaseReady && window.fb) { resolve(); return; }
+    const t = setTimeout(resolve, 6000);
+    window.addEventListener('firebase-ready', () => { clearTimeout(t); resolve(); }, { once: true });
+  });
+}
+
+function buildObVibeTags() {
+  const container = document.getElementById('ob-tags');
+  container.innerHTML = '';
+  VIBES.forEach(v => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'ob-tag'; btn.textContent = v;
+    btn.addEventListener('click', function() {
+      if (userVibes.includes(v)) { userVibes = userVibes.filter(x => x !== v); btn.classList.remove('on'); }
+      else { userVibes.push(v); btn.classList.add('on'); }
+      refreshObSelected();
+    });
+    container.appendChild(btn);
+  });
+
+  document.getElementById('ob-custom-add').addEventListener('click', addObCustom);
+  document.getElementById('ob-custom').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addObCustom(); }
+  });
+
+  document.getElementById('ob-go').addEventListener('click', function() {
+    const err = document.getElementById('ob-err-vibes');
+    err.textContent = '';
+    if (!userVibes.length) { err.textContent = 'Pick at least one vibe to continue.'; return; }
+    const raw = document.getElementById('ob-handle').value.trim().replace(/^@/, '');
+    const pin = window._newUserPin || '0000';
+    loginUser(raw, [...userVibes]);
+    // Save profile with PIN to Firebase
+    waitForFb().then(() => {
+      if (window.fb) window.fb.saveProfile(raw, userVibes, pin);
+    });
+  });
+}
+
+function addObCustom() {
+  const input = document.getElementById('ob-custom');
+  const v = input.value.trim();
+  if (!v || userVibes.includes(v)) { input.value = ''; return; }
+  userVibes.push(v);
+  input.value = '';
+  refreshObSelected();
+}
+
+function refreshObSelected() {
+  document.getElementById('ob-selected').innerHTML = userVibes.map(v =>
+    `<span class="ob-tag on" style="font-size:12px;padding:5px 12px">${v}</span>`).join('');
+}
+
+// ─── BOOT ─────────────────────────────────────────────────────
+function boot() {
+  document.getElementById('nav-handle').textContent = '@' + handle;
+  renderMyVibes();
+  buildFeedFilters();
+  wireUI();
+  // Show local requests immediately before Firebase loads
+  renderLocalRequests();
+  // Firebase subscription
+  const trySubscribe = () => { if (window.fb) { subscribe(); } };
+  window.addEventListener('firebase-ready', trySubscribe, { once: true });
+  trySubscribe();
+}
+
+// ─── STYLE REQUESTS ──────────────────────────────────────────
+async function addRequest() {
+  const input = document.getElementById('req-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  // Always save to localStorage immediately so it shows even without Firebase
+  const localKey = 'sf_reqs_' + handle.toLowerCase();
+  const localReqs = JSON.parse(localStorage.getItem(localKey) || '[]');
+  const tempId = 'local_' + Date.now();
+  localReqs.push({ id: tempId, text, active: true });
+  localStorage.setItem(localKey, JSON.stringify(localReqs));
+  renderLocalRequests();
+
+  // Also save to Firebase if available
+  if (window.fb && window._firebaseReady) {
+    try {
+      await window.fb.addRequest({ handle, text, active: true });
+    } catch(e) {
+      console.warn('Firebase request save failed:', e.message);
+      // Local save already worked, so user still sees it
+    }
+  }
+}
+
+function renderLocalRequests() {
+  const localKey = 'sf_reqs_' + handle.toLowerCase();
+  const localReqs = JSON.parse(localStorage.getItem(localKey) || '[]');
+  renderMyRequests(localReqs);
+}
+
+async function deleteRequest(id) {
+  // Remove from localStorage
+  const localKey = 'sf_reqs_' + handle.toLowerCase();
+  let localReqs = JSON.parse(localStorage.getItem(localKey) || '[]');
+  localReqs = localReqs.filter(r => r.id !== id);
+  localStorage.setItem(localKey, JSON.stringify(localReqs));
+  renderLocalRequests();
+
+  // Also remove from Firebase if it's a real Firebase id
+  if (!id.startsWith('local_') && window.fb) {
+    try { await window.fb.deleteRequest(id); } catch(e) {}
+  }
+}
+
+function renderMyRequests(reqs) {
+  const list = document.getElementById('req-list');
+  if (!list) return;
+  if (!reqs.length) {
+    list.innerHTML = '<div class="req-empty">No requests yet — add one above</div>';
+    return;
+  }
+  list.innerHTML = reqs.map(r => `
+    <div class="req-chip" id="chip-${r.id}">
+      <div style="display:flex;align-items:flex-start;gap:8px;flex:1">
+        <span style="color:var(--warm);font-size:14px;flex-shrink:0">✦</span>
+        <span class="req-chip-text">${r.text}</span>
+      </div>
+      <button class="req-chip-del" onclick="deleteRequest('${r.id}')" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+
+
+// ─── HANDLE CHECK ────────────────────────────────────────────
+async function checkHandleExists(h) {
+  if (!window.fb) return { exists: false, vibes: null };
+
+  // Look up handle in the dedicated handles registry first
+  const profile = await window.fb.getProfile(h);
+  if (profile) {
+    return { exists: true, vibes: profile.vibes || ['Casual'] };
+  }
+
+  // Fallback: search all items (public + private would require auth, so search all items snapshot)
+  return new Promise(resolve => {
+    let done = false;
+    const unsub = window.fb.listenAllItems(items => {
+      if (done) return;
+      done = true;
+      unsub();
+      const mine = items.filter(i => i.handle && i.handle.toLowerCase() === h.toLowerCase());
+      if (mine.length) {
+        const vibes = [...new Set(mine.flatMap(i => i.closetVibes || []))];
+        resolve({ exists: true, vibes: vibes.length ? vibes : ['Casual'] });
+      } else {
+        resolve({ exists: false, vibes: null });
+      }
+    });
+    setTimeout(() => { if (!done) { done = true; resolve({ exists: false, vibes: null }); } }, 4000);
+  });
+}
+
+// ─── WIRE UI ──────────────────────────────────────────────────
+function wireUI() {
+  // Tabs
+  document.getElementById('tab-closet').onclick = () => showPage('closet');
+  document.getElementById('tab-feed').onclick   = () => showPage('feed');
+  document.getElementById('btn-upload').onclick  = () => showPage('upload');
+
+  // Upload page
+  document.getElementById('file-input').onchange = e => handleUploadFile(e.target);
+  document.getElementById('btn-add-item').onclick = addItem;
+
+  // Drag & drop
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = 'var(--warm)'; });
+  dz.addEventListener('dragleave', () => { dz.style.borderColor = ''; });
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.style.borderColor = ''; const f = e.dataTransfer.files[0]; if (f) handleUploadFile(f); });
+
+  // Edit vibes
+  document.getElementById('btn-edit-vibes').onclick = openVibesModal;
+  document.getElementById('btn-vibes-cancel').onclick = () => closeModal('modal-vibes');
+  document.getElementById('btn-save-vibes').onclick = saveVibes;
+  document.getElementById('vibes-custom-add').onclick = addVibesCustom;
+  document.getElementById('vibes-custom').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); addVibesCustom(); } };
+
+  // Style modal
+  document.getElementById('btn-style-cancel').onclick = () => closeModal('modal-style');
+  document.getElementById('btn-post').onclick = postOutfit;
+
+  // Edit piece modal
+  document.getElementById('btn-edit-cancel').onclick = () => closeModal('modal-edit');
+  document.getElementById('btn-save-edit').onclick = saveEdit;
+  document.getElementById('edit-file').onchange = e => handleEditFile(e.target);
+
+  // Style requests
+  document.getElementById('btn-add-req').addEventListener('click', addRequest);
+  document.getElementById('req-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addRequest();
+  });
+
+  // Logout
+  document.getElementById('btn-logout').onclick = () => {
+    if (!confirm('Log out? You can log back in with the same handle.')) return;
+    localStorage.removeItem('sf_handle');
+    localStorage.removeItem('sf_vibes');
+    location.reload();
+  };
+
+  // Vibe search
+  document.getElementById('btn-vibe-search').onclick = searchVibe;
+  document.getElementById('vibe-search').onkeydown = e => { if (e.key === 'Enter') searchVibe(); };
+
+  // Lightbox
+  document.getElementById('lightbox-close').onclick = () => document.getElementById('lightbox').classList.remove('on');
+  document.getElementById('lightbox').onclick = e => { if (e.target === document.getElementById('lightbox')) document.getElementById('lightbox').classList.remove('on'); };
+
+  // Close modals on backdrop click
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.onclick = e => { if (e.target === m) m.classList.remove('on'); };
+  });
+}
+
+function searchVibe() {
+  const val = document.getElementById('vibe-search').value.trim();
+  if (!val) return;
+  // Add as active filter pill if not already there
+  activeVibe = val;
+  // Highlight or add pill
+  const existing = [...document.querySelectorAll('.fpill')].find(p => p.textContent.toLowerCase() === val.toLowerCase());
+  document.querySelectorAll('.fpill').forEach(p => p.classList.remove('on'));
+  if (existing) { existing.classList.add('on'); }
+  else {
+    const pill = document.createElement('button');
+    pill.className = 'fpill on';
+    pill.textContent = val;
+    pill.onclick = function() { setVibe(val, pill); };
+    document.getElementById('feed-filters').appendChild(pill);
+  }
+  renderFeed();
+}
+
+function openLightbox(src, alt) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-img').alt = alt || '';
+  document.getElementById('lightbox').classList.add('on');
+}
+
+// ─── PAGES ────────────────────────────────────────────────────
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('on'));
+  document.getElementById('page-' + p).classList.add('on');
+  document.getElementById('tab-closet').classList.toggle('on', p === 'closet' || p === 'upload');
+  document.getElementById('tab-feed').classList.toggle('on', p === 'feed');
+}
+
+// ─── FIREBASE SUBSCRIPTION ────────────────────────────────────
+function subscribe() {
+  window.fb.listenMyItems(handle, items => { myItems = items; renderCloset(); });
+  window.fb.listenPublicItems(items => {
+    publicItems = items;
+    renderFeed();
+    // Rebuild style modal pills if modal is open
+    const modal = document.getElementById('modal-style');
+    if (modal && modal.classList.contains('on') && modalOwnerHandle) {
+      rebuildModalPills();
+    }
+  });
+  window.fb.listenOutfitsFor(handle, outfits => { myOutfits = outfits; renderOutfitsReceived(); updateMyStats(); });
+  window.fb.listenAllOutfits(outfits => { allOutfits = outfits; renderFeed(); updateMyStats(); });
+  window.fb.listenMyRequests(handle, reqs => {
+    if (reqs.length) {
+      // Sync Firebase reqs to localStorage and render
+      const localKey = 'sf_reqs_' + handle.toLowerCase();
+      const localReqs = JSON.parse(localStorage.getItem(localKey) || '[]');
+      // Merge: keep local ones not yet in Firebase
+      const fbIds = new Set(reqs.map(r => r.id));
+      const localOnly = localReqs.filter(r => r.id.startsWith('local_'));
+      const merged = [...reqs, ...localOnly];
+      localStorage.setItem(localKey, JSON.stringify(merged));
+      renderMyRequests(merged);
+    } else {
+      renderLocalRequests();
+    }
+  });
+  window.fb.listenAllRequests(reqs => { allRequests = reqs; renderFeed(); });
+}
+
+// ─── MY VIBES ─────────────────────────────────────────────────
+function renderMyVibes() {
+  document.getElementById('my-vibes').innerHTML = userVibes.length
+    ? userVibes.map(v => `<span class="vbadge">${v}</span>`).join('')
+    : '<span style="font-size:13px;color:var(--muted)">No vibes set</span>';
+}
+
+// ─── MY STATS ─────────────────────────────────────────────────
+function updateMyStats() {
+  // Outfits I styled for others (my stylist record)
+  const myStyled = allOutfits.filter(o => o.stylist === handle);
+  const ratedByOthers = myStyled.filter(o => (o.stars||0) > 0);
+  const avgStylist = ratedByOthers.length
+    ? (ratedByOthers.reduce((s,o) => s+(o.stars||0), 0) / ratedByOthers.length).toFixed(1)
+    : null;
+
+  // Also compute from myOutfits (outfits styled FOR me, that I rated)
+  // Use the live myOutfits state which updates in real time
+  const ratedReceived = myOutfits.filter(o => (o.stars||0) > 0);
+
+  const el1 = document.getElementById('my-rating');
+  const el2 = document.getElementById('my-styled-count');
+  const el3 = document.getElementById('my-ratings-count');
+
+  if (el1) el1.textContent = avgStylist ? avgStylist + '★' : '—';
+  if (el2) el2.textContent = myStyled.length;
+  if (el3) el3.textContent = ratedByOthers.length;
+
+
+}
+
+// ─── VIBES MODAL ──────────────────────────────────────────────
+function openVibesModal() {
+  editVibesSelected = [...userVibes];
+  const container = document.getElementById('vibes-tags');
+  container.innerHTML = '';
+  VIBES.forEach(v => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ob-tag' + (editVibesSelected.includes(v) ? ' on' : '');
+    btn.textContent = v;
+    btn.onclick = function() {
+      if (editVibesSelected.includes(v)) {
+        editVibesSelected = editVibesSelected.filter(x => x !== v);
+        btn.classList.remove('on');
+      } else {
+        editVibesSelected.push(v);
+        btn.classList.add('on');
+      }
+      refreshVibesSelected();
+    };
+    container.appendChild(btn);
+  });
+  refreshVibesSelected();
+  document.getElementById('modal-vibes').classList.add('on');
+}
+
+function addVibesCustom() {
+  const input = document.getElementById('vibes-custom');
+  const v = input.value.trim();
+  if (!v || editVibesSelected.includes(v)) { input.value = ''; return; }
+  editVibesSelected.push(v);
+  input.value = '';
+  refreshVibesSelected();
+}
+
+function refreshVibesSelected() {
+  document.getElementById('vibes-selected').innerHTML = editVibesSelected.map(v =>
+    `<span class="ob-tag on" style="font-size:12px;padding:5px 12px">${v}</span>`).join('');
+}
+
+function saveVibes() {
+  if (!editVibesSelected.length) { alert('Pick at least one vibe'); return; }
+  userVibes = [...editVibesSelected];
+  localStorage.setItem('sf_vibes', JSON.stringify(userVibes));
+  localStorage.setItem('sf_vibes_' + handle.toLowerCase(), JSON.stringify(userVibes));
+  renderMyVibes();
+  closeModal('modal-vibes');
+  // Update Firebase profile with new vibes
+  if (window.fb) window.fb.saveProfile(handle, userVibes);
+}
+
+// ─── FILE UPLOAD ─────────────────────────────────────────────
+function resizeOnly(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        // Allow up to 2000px for high quality, Firestore stores as base64
+        const MAX = 2000;
+        let w = img.width, h = img.height;
+        if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        else if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, w, h);
+        // Use high quality JPEG
+        resolve(canvas.toDataURL('image/jpeg', 0.92));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function handleUploadFile(inputEl) {
+  const files = Array.from(inputEl.files);
+  if (!files.length) return;
+
+  const MAX_MB = 50;
+  const MAX_BYTES = MAX_MB * 1024 * 1024;
+
+  // Add to uploadedImages array
+  files.forEach(file => {
+    if (file.size > MAX_BYTES) {
+      setStatus('up-status', file.name + ' is too large (max ' + MAX_MB + 'MB)', 'err');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const entry = { dataUrl: e.target.result, resized: null, file };
+      uploadedImages.push(entry);
+      renderPreviews();
+      // Resize in background
+      resizeOnly(file).then(resized => {
+        entry.resized = resized;
+      });
+    };
+    reader.readAsDataURL(file);
+  }); // end forEach
+
+  document.querySelector('.drop-zone h3').textContent = 'Add more photos';
+  document.querySelector('.drop-zone p').textContent = 'or click to browse — first photo is the main one';
+}
+
+function renderPreviews() {
+  const grid = document.getElementById('preview-grid');
+  const thumbs = document.getElementById('preview-thumbs');
+  const count = document.getElementById('img-count');
+  if (!uploadedImages.length) { grid.style.display = 'none'; return; }
+  grid.style.display = 'block';
+  count.textContent = uploadedImages.length + ' photo' + (uploadedImages.length !== 1 ? 's' : '');
+  thumbs.innerHTML = '';
+  uploadedImages.forEach((img, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'prev-thumb-wrap' + (i === 0 ? ' primary' : '');
+    wrap.innerHTML = '<img src="' + img.dataUrl + '" alt="Photo ' + (i+1) + '">'
+      + (i === 0 ? '<span class="prev-thumb-primary">Main</span>' : '')
+      + '<button class="prev-thumb-remove" onclick="removeUploadImg(' + i + ')">✕</button>';
+    thumbs.appendChild(wrap);
+  });
+}
+
+function removeUploadImg(i) {
+  uploadedImages.splice(i, 1);
+  renderPreviews();
+}
+
+function handleEditFile(inputEl) {
+  const file = inputEl.files[0];
+  if (!file) return;
+  editFile = file; editProcessedImg = null;
+  const proc = document.getElementById('edit-proc');
+  if (proc) proc.style.display = 'flex';
+  // Show preview immediately
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById('edit-preview');
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  resizeOnly(file).then(img => {
+    editProcessedImg = img;
+    document.getElementById('edit-preview').src = img;
+    if (proc) proc.style.display = 'none';
+  });
+}
+
+async function addItem() {
+  const name    = document.getElementById('up-name').value.trim();
+  const cat     = document.getElementById('up-cat').value;
+  const color   = document.getElementById('up-color').value.trim();
+  const brand   = document.getElementById('up-brand').value.trim();
+  const material= document.getElementById('up-material').value.trim();
+  const details = document.getElementById('up-details').value.trim();
+  const isPublic = document.getElementById('up-public').checked;
+  if (!name||!cat) { setStatus('up-status','Please add a name and category','err'); return; }
+  if (!window.fb) { setStatus('up-status','Still connecting...','err'); return; }
+  const btn = document.getElementById('btn-add-item');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Uploading...';
+  try {
+    // Use resized images; fall back to dataUrl if resize not done yet
+    const images = uploadedImages.map(img => img.resized || img.dataUrl);
+    const imgUrl = images[0] || null; // primary image
+    const imgUrls = images.length > 1 ? images : null; // additional images
+    await window.fb.addItem({ name, cat, color, brand, material, details, handle, isPublic, imgUrl, imgUrls, closetVibes: userVibes });
+
+    // Reset form
+    document.getElementById('up-name').value='';
+    document.getElementById('up-cat').value='';
+    document.getElementById('up-color').value='';
+    document.getElementById('up-brand').value='';
+    document.getElementById('up-material').value='';
+    document.getElementById('up-details').value='';
+    document.getElementById('file-input').value='';
+    document.getElementById('preview-grid').style.display='none';
+    document.querySelector('.drop-zone h3').textContent='Drop photos here';
+    document.querySelector('.drop-zone p').textContent='or click to browse — select multiple images';
+    uploadedImages=[];
+    setStatus('up-status','✓ Added!','ok');
+    setTimeout(()=>showPage('closet'),1000);
+  } catch(e) { setStatus('up-status','Failed: '+e.message,'err'); }
+  finally { btn.disabled=false; btn.textContent='Add to closet →'; }
+}
+
+// ─── CLOSET ───────────────────────────────────────────────────
+function renderCloset() {
+  document.getElementById('closet-count').textContent = myItems.length+' piece'+(myItems.length!==1?'s':'');
+  const grid = document.getElementById('closet-grid');
+  if (!myItems.length) {
+    grid.innerHTML='<div class="empty"><h3>Nothing here yet</h3><p>Upload your first piece!</p></div>';
+    return;
+  }
+  const ORDER = ['Tops','Shirts & Blouses','Jackets','Pants','Skirts','Bottoms','Dresses','Outerwear','Shoes','Accessories','Other'];
+  const grouped = {};
+  ORDER.forEach(c => { grouped[c] = []; });
+  myItems.forEach(item => {
+    const c = item.cat || 'Other';
+    if (grouped[c] !== undefined) grouped[c].push(item);
+    else grouped['Other'].push(item);
+  });
+  let rows = [];
+  ORDER.forEach(cat => {
+    const items = grouped[cat] || [];
+    if (!items.length) return;
+    rows.push(buildCatHeader(cat, items.length));
+    items.forEach(item => rows.push(buildItemCard(item)));
+  });
+  grid.innerHTML = rows.join('');
+}
+
+function showClosetTab(tab) {
+  document.getElementById('ctab-content-pieces').style.display = tab === 'pieces' ? 'block' : 'none';
+  document.getElementById('ctab-content-styled').style.display = tab === 'styled' ? 'block' : 'none';
+  // Title styling
+  document.getElementById('closet-title-pieces').classList.toggle('muted', tab === 'styled');
+  document.getElementById('closet-title-styled').classList.toggle('on', tab === 'styled');
+}
+
+function buildCatHeader(cat, count) {
+  return '<div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-top:8px">'
+    + '<span style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">' + cat + '</span>'
+    + '<div style="flex:1;height:1px;background:var(--soft)"></div>'
+    + '<span style="font-size:12px;color:var(--muted)">' + count + '</span>'
+    + '</div>';
+}
+
+function buildItemCard(item) {
+  const safeName = (item.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  const mainImg = item.imgUrl
+    ? '<img src="' + item.imgUrl + '" alt="' + (item.name||'') + '" onclick="openLightbox(this.src,\'' + safeName + '\')" style="cursor:zoom-in">'
+    : '<div class="icard-ph">' + (EMOJIS[item.cat]||'\u{1F455}') + '</div>';
+  let thumbs = '';
+  if (item.imgUrls && item.imgUrls.length > 1) {
+    thumbs = '<div style="display:flex;gap:3px;padding:4px 6px;overflow-x:auto">';
+    item.imgUrls.slice(1, 4).forEach(function(u) {
+      thumbs += '<img src="' + u + '" onclick="openLightbox(this.src,\'\')" style="width:36px;height:36px;object-fit:cover;border-radius:5px;cursor:zoom-in;flex-shrink:0">';
+    });
+    if (item.imgUrls.length > 4) thumbs += '<div style="width:36px;height:36px;border-radius:5px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)">+' + (item.imgUrls.length-3) + '</div>';
+    thumbs += '</div>';
+  }
+  return '<div class="icard">'
+    + mainImg
+    + '<div class="icard-acts">'
+    + '<button class="icard-btn icard-edit" onclick="openEditModal(\'' + item.id + '\')" title="Edit">&#9998;</button>'
+    + '<button class="icard-btn icard-del" onclick="deleteItem(\'' + item.id + '\',\'' + safeName + '\')" title="Delete">&#x2715;</button>'
+    + '</div>'
+    + '<div class="icard-body">'
+    + '<div class="icard-name">' + (item.name||'') + '</div>'
+    + (item.brand ? '<div style="font-size:11px;color:var(--warm);font-weight:500">' + item.brand + '</div>' : '')
+    + '</div></div>';
+}
+
+
+async function togglePublic(id, cur, el) {
+  try { await window.fb.togglePublic(id,!cur); }
+  catch(e) { el.checked=cur; }
+}
+async function deleteItem(id, name) {
+  if (!confirm(`Delete "${name}"?`)) return;
+  try { await window.fb.deleteItem(id); } catch(e) { alert('Failed: '+e.message); }
+}
+
+// ─── EDIT MODAL ───────────────────────────────────────────────
+function openEditModal(id) {
+  const item = myItems.find(i => i.id === id);
+  if (!item) return;
+  editFile = null; editProcessedImg = null;
+  document.getElementById('edit-id').value       = id;
+  document.getElementById('edit-name').value     = item.name || '';
+  document.getElementById('edit-brand').value    = item.brand || '';
+  document.getElementById('edit-cat').value      = item.cat || 'Tops';
+  document.getElementById('edit-color').value    = item.color || '';
+  document.getElementById('edit-material').value = item.material || '';
+  document.getElementById('edit-details').value  = item.details || '';
+  document.getElementById('edit-public').checked = !!item.isPublic;
+  document.getElementById('edit-file').value     = '';
+  document.getElementById('edit-status').textContent = '';
+  const proc = document.getElementById('edit-proc');
+  if (proc) proc.style.display = 'none';
+  const prev = document.getElementById('edit-preview');
+  if (item.imgUrl) { prev.src = item.imgUrl; prev.style.display = 'block'; }
+  else { prev.src = ''; prev.style.display = 'none'; }
+  document.getElementById('modal-edit').classList.add('on');
+}
+
+async function saveEdit() {
+  const id       = document.getElementById('edit-id').value;
+  const name     = document.getElementById('edit-name').value.trim();
+  const brand    = document.getElementById('edit-brand').value.trim();
+  const cat      = document.getElementById('edit-cat').value;
+  const color    = document.getElementById('edit-color').value.trim();
+  const material = document.getElementById('edit-material').value.trim();
+  const details  = document.getElementById('edit-details').value.trim();
+  const isPublic = document.getElementById('edit-public').checked;
+  if (!name) { setStatus('edit-status', 'Name is required', 'err'); return; }
+  const btn = document.getElementById('btn-save-edit');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Saving...';
+  try {
+    const updates = { name, brand, cat, color, material, details, isPublic };
+    if (editProcessedImg) updates.imgUrl = editProcessedImg;
+    await window.fb.updateItem(id, updates);
+    editProcessedImg = null;
+    closeModal('modal-edit');
+  } catch(e) { setStatus('edit-status', 'Failed: ' + e.message, 'err'); }
+  finally { btn.disabled = false; btn.textContent = 'Save changes'; }
+}
+
+// ─── OUTFITS RECEIVED ─────────────────────────────────────────
+function renderOutfitsReceived() {
+  const el = document.getElementById('outfits-received');
+  if (!myOutfits.length) {
+    el.innerHTML = '<div class="no-outfits">No styling yet — once others style your pieces, they will appear here ✨</div>';
+    return;
+  }
+  el.innerHTML = myOutfits.map(o => {
+    const r = o.stars || 0;
+    const locked = r > 0;
+    return `<div class="outfit-card" id="oc-${o.id}">
+      <div class="outfit-hdr">
+        <div class="outfit-av">${o.stylist[0].toUpperCase()}</div>
+        <span class="outfit-by">@${o.stylist} styled your closet</span>
+        <span class="outfit-time">${timeAgo(o.createdAt)}</span>
+      </div>
+      <div class="outfit-pieces">
+        ${(o.pieces||[]).map(p=>`<div class="outfit-piece">
+          ${p.imgUrl?`<img src="${p.imgUrl}" alt="${p.name}">`:`<div class="outfit-piece-ph">${EMOJIS[p.cat]||'👗'}</div>`}
+          <div class="outfit-piece-name">${p.name}</div>
+        </div>`).join('')}
+      </div>
+      ${o.prompt ? `<div style="display:inline-flex;align-items:center;gap:5px;background:var(--warm-light);border:1px solid var(--warm);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--warm);font-weight:500;margin:0 16px 8px">✦ ${o.prompt}</div>` : ''}
+      ${o.note && o.note !== o.prompt ?`<div class="outfit-note">"${o.note}"</div>`:''}
+      <div class="outfit-foot">
+        <div class="rating-row" style="margin-left:auto">
+          <div class="rating-lbl">${locked ? 'Your rating' : 'Rate this look'}</div>
+          <div class="srow${locked?' locked':''}" id="srow-${o.id}">
+            <span class="s${r>=1?' lit':''}" data-v="1">★</span>
+            <span class="s${r>=2?' lit':''}" data-v="2">★</span>
+            <span class="s${r>=3?' lit':''}" data-v="3">★</span>
+            <span class="s${r>=4?' lit':''}" data-v="4">★</span>
+            <span class="s${r>=5?' lit':''}" data-v="5">★</span>
+          </div>
+          ${locked?`<div class="rating-given">You gave ${r}★</div>`:'<div class="rating-given" id="rg-'+o.id+'" style="visibility:hidden">_</div>'}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Wire hover + click on every unlocked star row
+  document.querySelectorAll('.srow:not(.locked)').forEach(row => {
+    const id = row.id.replace('srow-','');
+    const stars = row.querySelectorAll('.s');
+    const givenEl = document.getElementById('rg-'+id);
+
+    stars.forEach(star => {
+      const v = parseInt(star.dataset.v);
+
+      star.addEventListener('mouseenter', () => {
+        stars.forEach(s => s.classList.toggle('lit', parseInt(s.dataset.v) <= v));
+      });
+    });
+
+    row.addEventListener('mouseleave', () => {
+      stars.forEach(s => s.classList.remove('lit'));
+    });
+
+    stars.forEach(star => {
+      star.addEventListener('click', async () => {
+        const v = parseInt(star.dataset.v);
+        row.classList.add('locked');
+        stars.forEach(s => s.classList.toggle('lit', parseInt(s.dataset.v) <= v));
+        const lbl = row.closest('.rating-row').querySelector('.rating-lbl');
+        if (lbl) lbl.textContent = 'Your rating';
+        if (givenEl) { givenEl.textContent = 'You gave '+v+'★'; givenEl.style.visibility='visible'; }
+        try { await window.fb.rateOutfit(id, v); } catch(e){}
+        updateMyStats();
+      });
+    });
+  });
+}
+
+function likeOutfit(id,likes,btn){
+  const liked=btn.classList.contains('liked');
+  btn.classList.toggle('liked');
+  btn.textContent='♥ '+(liked?Math.max(0,likes-1):likes+1);
+  window.fb.likeOutfit(id,likes,liked).catch(()=>{btn.classList.toggle('liked');btn.textContent='♥ '+likes;});
+}
+
+// ─── DISCOVER FEED ────────────────────────────────────────────
+function buildFeedFilters() {
+  const el=document.getElementById('feed-filters');
+  el.innerHTML=[{v:'all',l:'All'},...VIBES.map(v=>({v,l:v}))].map(({v,l})=>
+    `<button class="fpill${v==='all'?' on':''}" onclick="setVibe('${v}',this)">${l}</button>`).join('');
+}
+
+function setVibe(v,btn){
+  document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on'); activeVibe=v; renderFeed();
+}
+
+function buildReqBadges(ownerHandle, reqs) {
+  let html = '<div style="margin-bottom:14px">'
+    + '<div style="font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Style requests</div>'
+    + '<div class="req-badges-row">';
+  reqs.slice(0,3).forEach(function(r) {
+    const safeText = r.text.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const safeHandle = ownerHandle.replace(/'/g,"\'");
+    html += '<span class="req-badge" onclick="openStyleModal(\'' + safeHandle + '\',\'' + safeText + '\')">\u2726 ' + r.text + '</span>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function renderFeed() {
+  const byOwner={};
+  publicItems.forEach(item=>{
+    if(item.handle===handle)return;
+    if(!byOwner[item.handle])byOwner[item.handle]=[];
+    byOwner[item.handle].push(item);
+  });
+  const entries=Object.entries(byOwner).filter(([,items])=>
+    activeVibe==='all'||items.some(i=>(i.closetVibes||[]).includes(activeVibe)));
+  const el=document.getElementById('feed-content');
+  if(!entries.length){
+    el.innerHTML='<div class="empty"><h3>No closets here yet</h3><p>'+(activeVibe==='all'?'Once users add public pieces, their closets appear here.':'No closets with this vibe yet.')+'</p></div>';
+    return;
+  }
+  el.innerHTML=entries.map(([ownerHandle,items])=>{
+    const vibes=[...new Set(items.flatMap(i=>i.closetVibes||[]))];
+    const ownerRequests = allRequests.filter(r=>r.handle===ownerHandle && r.active);
+    // Stylist stats: outfits this user has styled for others, rated by recipients
+    const styled = allOutfits.filter(o=>o.stylist===ownerHandle);
+    const ratedOutfits = styled.filter(o=>o.stars>0);
+    const avgRating = ratedOutfits.length ? (ratedOutfits.reduce((s,o)=>s+(o.stars||0),0)/ratedOutfits.length).toFixed(1) : null;
+    return `<div class="ccard">
+      <div class="ccard-hdr">
+        <div class="av">${ownerHandle[0].toUpperCase()}</div>
+        <div>
+          <div class="ccard-name">@${ownerHandle}</div>
+          <div class="ccard-meta-row">
+            <span class="ccard-count">${items.length} piece${items.length!==1?'s':''}</span>
+            <span class="ccard-dot">·</span>
+            <span class="ccard-styled">✂ ${styled.length} styled</span>
+            ${avgRating ? `<span class="ccard-dot">·</span><span class="ccard-avg-rating">★ ${avgRating}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      ${vibes.length?`<div class="ccard-vibes">${vibes.map(v=>`<span class="vbadge">${v}</span>`).join('')}</div>`:''}
+      ${ownerRequests.length ? buildReqBadges(ownerHandle, ownerRequests) : ''}
+      <div class="ccard-pieces">
+        ${items.slice(0,5).map(i=>`<div class="prev-item">${i.imgUrl?`<img class="prev-thumb" src="${i.imgUrl}" alt="${i.name}" onclick="openLightbox('${i.imgUrl}','${i.name.replace(/'/g,"\'")}')" style="cursor:zoom-in">`:`<div class="prev-ph">${EMOJIS[i.cat]||'👗'}</div>`}<div class="prev-name">${i.name}</div></div>`).join('')}
+        ${items.length>5?`<div class="prev-more">+${items.length-5} more</div>`:''}
+      </div>
+      <button class="style-btn" onclick="openStyleModal('${ownerHandle}')">Style @${ownerHandle}'s closet</button>
+    </div>`;
+  }).join('');
+}
+
+// ─── STYLE MODAL ──────────────────────────────────────────────
+function openStyleModal(ownerHandle, requestPrompt) {
+  modalOwnerHandle=ownerHandle; selectedPieces=new Set();
+  document.getElementById('style-sub').textContent='Building an outfit for @'+ownerHandle;
+  document.getElementById('style-note').value = requestPrompt || '';
+  document.getElementById('style-status').textContent='';
+
+  // Show owner's style requests — check both Firebase (allRequests) and localStorage
+  const fbReqs = allRequests.filter(r => r.handle === ownerHandle && r.active);
+  // Also check if we have local requests for this owner (when they're on same device)
+  const localKey = 'sf_reqs_' + ownerHandle.toLowerCase();
+  const localReqs = JSON.parse(localStorage.getItem(localKey) || '[]');
+  // Merge, deduplicate by text
+  const allTexts = new Set();
+  const ownerReqs = [];
+  [...fbReqs, ...localReqs].forEach(r => {
+    if (!allTexts.has(r.text)) { allTexts.add(r.text); ownerReqs.push(r); }
+  });
+  const reqSection = document.getElementById('modal-requests');
+  const reqList = document.getElementById('modal-req-list');
+  if (ownerReqs.length) {
+    reqSection.style.display = 'block';
+    reqList.innerHTML = '';
+    ownerReqs.forEach(function(r) {
+      const div = document.createElement('div');
+      div.className = 'modal-req-chip' + (requestPrompt && r.text === requestPrompt ? ' active' : '');
+      div.innerHTML = '<span style="color:var(--warm);margin-right:6px">✦</span>' + r.text;
+      div.addEventListener('click', function() { selectModalReq(div, r.text); });
+      reqList.appendChild(div);
+    });
+  } else {
+    reqSection.style.display = 'none';
+  }
+  // Group items by category
+  const CAT_ORDER = ['Tops','Shirts & Blouses','Jackets','Pants','Skirts','Bottoms','Dresses','Outerwear','Shoes','Accessories','Other'];
+  const grouped = {};
+  CAT_ORDER.forEach(c => { grouped[c] = []; });
+  const allItems = publicItems.filter(i => i.handle === ownerHandle);
+  allItems.forEach(item => {
+    const c = item.cat || 'Other';
+    if (grouped[c] !== undefined) grouped[c].push(item);
+    else grouped['Other'].push(item);
+  });
+
+  // Build category filter pills
+  const pillsEl = document.getElementById('cat-filter-pills');
+  pillsEl.innerHTML = '';
+  let activeCat = 'all';
+
+  function setCat(cat, pillEl) {
+    activeCat = cat;
+    pillsEl.querySelectorAll('.cat-filter-pill').forEach(p => p.classList.remove('on'));
+    pillEl.classList.add('on');
+    renderPieceSel(grouped, CAT_ORDER, activeCat);
+  }
+
+  const allPill = document.createElement('button');
+  allPill.className = 'cat-filter-pill on';
+  allPill.textContent = 'All';
+  allPill.addEventListener('click', function() { setCat('all', allPill); });
+  pillsEl.appendChild(allPill);
+
+  CAT_ORDER.forEach(cat => {
+    if (!(grouped[cat] || []).length) return;
+    const pill = document.createElement('button');
+    pill.className = 'cat-filter-pill';
+    pill.textContent = cat + ' (' + grouped[cat].length + ')';
+    pill.addEventListener('click', function() { setCat(cat, pill); });
+    pillsEl.appendChild(pill);
+  });
+
+  selectedPieces = new Set();
+  updateSelectedStrip();
+  document.getElementById('modal-style').classList.add('on');
+  // Build pills (may also be rebuilt when publicItems syncs)
+  rebuildModalPills();
+}
+function rebuildModalPills() {
+  const CAT_ORDER = ['Tops','Shirts & Blouses','Jackets','Pants','Skirts','Bottoms','Dresses','Outerwear','Shoes','Accessories','Other'];
+  const grouped = {};
+  CAT_ORDER.forEach(c => { grouped[c] = []; });
+  publicItems.filter(i => i.handle === modalOwnerHandle).forEach(item => {
+    const c = item.cat || 'Other';
+    if (grouped[c] !== undefined) grouped[c].push(item);
+    else grouped['Other'].push(item);
+  });
+  const pillsEl = document.getElementById('cat-filter-pills');
+  if (!pillsEl) return;
+  pillsEl.innerHTML = '';
+  let activeCat = 'all';
+  const allPill = document.createElement('button');
+  allPill.className = 'cat-filter-pill on';
+  allPill.textContent = 'All';
+  allPill.addEventListener('click', function() {
+    activeCat = 'all';
+    pillsEl.querySelectorAll('.cat-filter-pill').forEach(p => p.classList.remove('on'));
+    allPill.classList.add('on');
+    renderPieceSel(grouped, CAT_ORDER, 'all');
+  });
+  pillsEl.appendChild(allPill);
+  CAT_ORDER.forEach(cat => {
+    if (!(grouped[cat]||[]).length) return;
+    const pill = document.createElement('button');
+    pill.className = 'cat-filter-pill';
+    pill.textContent = cat + ' (' + grouped[cat].length + ')';
+    pill.addEventListener('click', function() {
+      activeCat = cat;
+      pillsEl.querySelectorAll('.cat-filter-pill').forEach(p => p.classList.remove('on'));
+      pill.classList.add('on');
+      renderPieceSel(grouped, CAT_ORDER, cat);
+    });
+    pillsEl.appendChild(pill);
+  });
+  renderPieceSel(grouped, CAT_ORDER, activeCat);
+}
+
+function renderPieceSel(grouped, CAT_ORDER, activeCat) {
+  const sel = document.getElementById('piece-sel');
+  sel.innerHTML = '';
+  const catsToShow = activeCat === 'all' ? CAT_ORDER : [activeCat];
+  catsToShow.forEach(cat => {
+    const catItems = grouped[cat] || [];
+    if (!catItems.length) return;
+    if (activeCat === 'all') {
+      const hdr = document.createElement('div');
+      hdr.className = 'piece-cat-header';
+      hdr.textContent = cat;
+      sel.appendChild(hdr);
+    }
+    catItems.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'piece-opt' + (selectedPieces.has(item.id) ? ' on' : '');
+      card.id = 'po-' + item.id;
+      const safeName = (item.name||'').replace(/'/g,"\'");
+      const meta = [item.brand, item.material, item.details].filter(Boolean).join(' · ');
+      card.innerHTML = (item.imgUrl
+        ? '<div style="position:relative"><img src="'+item.imgUrl+'" alt="'+item.name+'" style="width:100%;height:160px;object-fit:contain;background:white;display:block">'
+          + '<button data-src="'+item.imgUrl+'" data-name="'+item.name+'" onclick="event.stopPropagation();openLightbox(this.dataset.src,this.dataset.name)" style="position:absolute;top:4px;right:4px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:22px;height:22px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1" title="View larger">⤢</button></div>'
+        : '<div class="piece-opt-ph" style="height:160px">'+(EMOJIS[item.cat]||'👗')+'</div>')
+        + '<div style="padding:6px 6px 8px">'
+        + '<div class="piece-opt-lbl" style="font-weight:500;color:var(--ink);margin-bottom:2px">'+item.name+'</div>'
+        + (item.brand ? '<div style="font-size:10px;color:var(--warm);font-weight:500;margin-bottom:2px">'+item.brand+'</div>' : '')
+        + (item.cat ? '<div style="font-size:10px;color:var(--muted)">'+item.cat+(item.color?' · '+item.color:'')+'</div>' : '')
+        + (meta ? '<div style="font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4">'+meta+'</div>' : '')
+        + '</div>';
+      card.addEventListener('click', function() { togglePiece(item.id, card); });
+      sel.appendChild(card);
+    });
+  });
+}
+
+function selectModalReq(el, text) {
+  // Toggle selection
+  const isActive = el.classList.contains('active');
+  document.querySelectorAll('.modal-req-chip').forEach(c => c.classList.remove('active'));
+  if (!isActive) {
+    el.classList.add('active');
+    document.getElementById('style-note').value = text;
+  } else {
+    document.getElementById('style-note').value = '';
+  }
+}
+
+function stripRemove(btn) {
+  const id = btn.dataset.id;
+  const el = document.getElementById('po-' + id);
+  if (el) togglePiece(id, el);
+  else { selectedPieces.delete(id); updateSelectedStrip(); }
+}
+
+function togglePiece(id,el){
+  if(selectedPieces.has(id)){selectedPieces.delete(id);el.classList.remove('on');}
+  else{selectedPieces.add(id);el.classList.add('on');}
+  updateSelectedStrip();
+}
+
+function updateSelectedStrip() {
+  const wrap = document.getElementById('selected-strip-wrap');
+  const strip = document.getElementById('selected-strip');
+  if (!wrap || !strip) return;
+  const selected = publicItems.filter(i => selectedPieces.has(i.id));
+  wrap.style.display = 'block';
+  if (!selected.length) {
+    strip.innerHTML = '<div style="width:100%;text-align:center;padding:16px 0"><div style="font-size:15px;color:var(--muted);margin-bottom:4px">No pieces selected yet</div><div style="font-size:12px;color:var(--soft)">Browse by category below and click to add</div></div>';
+    return;
+  }
+  strip.innerHTML = selected.map(item => {
+    const safeName = (item.name||'').replace(/'/g,"\'");
+    return '<div class="selected-strip-item">'
+      + (item.imgUrl
+        ? '<img src="'+item.imgUrl+'" alt="'+item.name+'">'
+        : '<div class="selected-strip-item-ph">'+(EMOJIS[item.cat]||'👗')+'</div>')
+      + '<div class="selected-strip-item-name">'+item.name+'</div>'
+      + '<button class="selected-strip-remove" data-id="'+item.id+'" onclick="stripRemove(this)" title="Remove">&#x2715;</button>'
+      + '</div>';
+  }).join('');
+}
+async function postOutfit(){
+  if(!selectedPieces.size){setStatus('style-status','Select at least one piece','err');return;}
+  const note=document.getElementById('style-note').value.trim();
+  const btn=document.getElementById('btn-post');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>Posting...';
+  try{
+    const pieces=publicItems.filter(i=>selectedPieces.has(i.id)).map(i=>({id:i.id,name:i.name,cat:i.cat,imgUrl:i.imgUrl||null}));
+    // Check if the note matches one of the owner's requests (i.e. it was a prompt response)
+    const ownerReqs = allRequests.filter(r => r.handle === modalOwnerHandle && r.active);
+    const matchedPrompt = ownerReqs.find(r => note && note.trim() === r.text.trim());
+    const prompt = matchedPrompt ? matchedPrompt.text : null;
+    await window.fb.addOutfit({stylist:handle,forHandle:modalOwnerHandle,note,pieces,prompt});
+    closeModal('modal-style');
+  }catch(e){setStatus('style-status','Failed: '+e.message,'err');}
+  finally{btn.disabled=false;btn.textContent='Post outfit →';}
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────
+function closeModal(id){document.getElementById(id).classList.remove('on');}
+function setStatus(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className='status '+type;if(type==='ok')setTimeout(()=>el.textContent='',3000);}
+function timeAgo(ts){
+  if(!ts)return'just now';
+  const d=ts.toDate?ts.toDate():new Date(ts);
+  const s=Math.floor((Date.now()-d)/1000);
+  if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+}
+</script>
+
+<!-- Firebase (module, loads async) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, getDoc, setDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const cfg = {
+    apiKey:"AIzaSyCQqnEf_Kj1irkVgp-06QTDnDmB9V_MKp0",
+    authDomain:"stylefit-29a40.firebaseapp.com",
+    projectId:"stylefit-29a40",
+    storageBucket:"stylefit-29a40.firebasestorage.app",
+    messagingSenderId:"546675718224",
+    appId:"1:546675718224:web:c08b4dce453200b9ff3955"
+  };
+  const app = initializeApp(cfg);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  // Expose helpers
+  window.fb = {
+    resize(file) {
+      return new Promise((res,rej)=>{
+        const r=new FileReader();
+        r.onload=e=>{
+          const img=new Image();
+          img.onload=()=>{
+            const c=document.createElement('canvas');
+            const M=1200; // high res
+            let w=img.width,h=img.height;
+            if(w>h&&w>M){h=Math.round(h*M/w);w=M;}
+            else if(h>M){w=Math.round(w*M/h);h=M;}
+            c.width=w;c.height=h;
+            const ctx=c.getContext('2d');
+            ctx.imageSmoothingEnabled=true;
+            ctx.imageSmoothingQuality='high';
+            ctx.fillStyle='#fff';
+            ctx.fillRect(0,0,w,h);
+            ctx.drawImage(img,0,0,w,h);
+            res(c.toDataURL('image/png',1.0)); // lossless PNG for max quality
+          };
+          img.onerror=rej;img.src=e.target.result;
+        };
+        r.onerror=rej;r.readAsDataURL(file);
+      });
+    },
+    addItem(data)      { return addDoc(collection(db,'items'),{...data,createdAt:serverTimestamp()}); },
+    updateItem(id,data){ return updateDoc(doc(db,'items',id),data); },
+    deleteItem(id)     { return deleteDoc(doc(db,'items',id)); },
+    togglePublic(id,v) { return updateDoc(doc(db,'items',id),{isPublic:v}); },
+    addOutfit(data)    { return addDoc(collection(db,'outfits'),{...data,likes:0,createdAt:serverTimestamp()}); },
+    likeOutfit(id,likes,liked){ return updateDoc(doc(db,'outfits',id),{likes:liked?Math.max(0,likes-1):likes+1}); },
+    listenMyItems(handle,cb){
+      return onSnapshot(query(collection(db,'items'),orderBy('createdAt','desc')),
+        snap=>cb(snap.docs.map(d=>({id:d.id,...d.data()})).filter(i=>i.handle===handle)));
+    },
+    listenPublicItems(cb){
+      return onSnapshot(query(collection(db,'items'),orderBy('createdAt','desc')),
+        snap=>cb(snap.docs.map(d=>({id:d.id,...d.data()})).filter(i=>i.isPublic)));
+    },
+    listenOutfitsFor(handle,cb){
+      return onSnapshot(query(collection(db,'outfits'),orderBy('createdAt','desc')),
+        snap=>cb(snap.docs.map(d=>({id:d.id,...d.data()})).filter(o=>o.forHandle===handle)));
+    },
+    listenAllOutfits(cb){
+      return onSnapshot(query(collection(db,'outfits'),orderBy('createdAt','desc')),
+        snap=>cb(snap.docs.map(d=>({id:d.id,...d.data()}))));
+    },
+    rateOutfit(id, stars){ return updateDoc(doc(db,'outfits',id),{stars}); },
+  };
+
+  // Sign in & signal ready
+  const signal = () => { window._firebaseReady=true; window.dispatchEvent(new Event('firebase-ready')); };
+  onAuthStateChanged(auth, u => { if(u) signal(); });
+  signInAnonymously(auth).catch(signal);
+  setTimeout(signal, 5000);
+</script>
+</body>
+</html>
